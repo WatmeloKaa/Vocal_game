@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V家猜曲挑战</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部提示区 -->
+        <div class="header-info">
+            <h1>🎵 V家猜曲挑战</h1>
+            <p>🟢 完全正确 · 🟠 数值接近/方向提示 · ⚪️ 错误</p>
+        </div>
+
+<!-- 表头区域 -->
+        <div class="grid-header">
+            <div class="col-title">曲名</div>
+            <div class="col-singer">歌姬</div> 
+            <div class="col-author">P主</div>
+            <div class="col-status">播放量</div>
+            <div class="col-date">投稿日期</div>
+            <div class="col-sh">SH</div>
+            <div class="col-mf">门番</div>
+        </div>
+
+        <!-- 猜歌记录面板 -->
+        <div id="results-board"></div>
+
+        <!-- 搜索与提交区域 (移动到底部，更符合截图的 UI 逻辑) -->
+        <div class="search-box">
+            <input type="text" id="guess-input" list="song-list" placeholder="输入你想猜的V家歌曲名..." autocomplete="off">
+            <datalist id="song-list"></datalist>
+            <button id="guess-btn">提交猜测</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

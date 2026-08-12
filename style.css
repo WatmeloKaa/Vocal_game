@@ -1,0 +1,140 @@
+/* 整体页面设置 - 浅色清新风 */
+body {
+    background-color: #f7f9f6; 
+    color: #333333;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    display: flex;
+    justify-content: center;
+    padding-top: 40px;
+    margin: 0;
+}
+
+/* 中间主容器 */
+.container {
+    width: 100%;
+    /* 【修复点1】将最大宽度从 1000px 增加到 1150px，给 7 个卡片更多呼吸空间 */
+    max-width: 1150px; 
+    padding: 0 20px;
+}
+
+/* 顶部提示区 */
+.header-info {
+    text-align: left;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e1e6db;
+    padding-bottom: 10px;
+}
+.header-info h1 {
+    color: #4a5c44;
+    margin: 0 0 5px 0;
+    font-size: 24px;
+}
+.header-info p {
+    color: #889980;
+    font-size: 13px;
+    margin: 0;
+}
+
+/* --- 网格布局基础设定 --- */
+.grid-header, .result-row {
+    display: grid;
+    /* 【修复点2】关键修复！明确划分 7 个列的比例，绝对不会再换行了 */
+    /* 比例：曲名(最宽) | 歌姬 | P主 | 播放量 | 日期 | SH(较窄) | 门番(较窄) */
+    grid-template-columns: 2.5fr 1.2fr 1.2fr 1.2fr 1.2fr 0.8fr 0.8fr;
+    gap: 8px;
+    align-items: stretch; /* 确保同一行的所有格子高度一致 */
+}
+
+/* 表头样式 */
+.grid-header {
+    margin-bottom: 10px;
+    padding: 0 5px;
+    color: #617359;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* 结果行样式 */
+.result-row {
+    background: #ffffff;
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 12px;
+    animation: fadeIn 0.4s ease;
+}
+
+/* 独立格子通用样式 */
+.attr-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px 5px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    min-height: 24px;
+}
+
+/* 颜色状态 (复刻截图) */
+.name-box {
+    background-color: #ffffff; /* 曲名白底黑字 */
+    color: #333333;
+    border: 1px solid #e8e8e8;
+}
+.correct-box {
+    background-color: #27a264; /* 绿色：完全正确 */
+    color: white;
+}
+.partial-box {
+    background-color: #e5b537; /* 黄色：歌姬部分一致 */
+    color: white;
+}
+.close-box {
+    background-color: #d88124; /* 橙色：带箭头的接近状态 */
+    color: white;
+}
+.incorrect-box {
+    background-color: #a39f9e; /* 灰色：错误 */
+    color: white;
+}
+
+/* 底部搜索区域 */
+.search-box {
+    margin-top: 40px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+input {
+    flex: 1;
+    max-width: 600px;
+    padding: 14px;
+    border: 2px solid #c9d6c1;
+    border-radius: 6px;
+    font-size: 16px;
+    outline: none;
+}
+input:focus {
+    border-color: #a4c495;
+}
+button {
+    padding: 14px 30px;
+    background-color: #dcf2b5;
+    color: #556b3e;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #c7e398;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
