@@ -3,39 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>V家猜曲挑战</title>
+    <title>Vocaloid 猜曲游戏</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <!-- 顶部提示区 -->
-        <div class="header-info">
-            <h1>🎵 V家猜曲挑战</h1>
-            <p>🟢 完全正确 · 🟠 数值接近/方向提示 · ⚪️ 错误</p>
-        </div>
+    <!-- 后门：投降按钮放在最右上角 -->
+    <button id="surrender-btn" class="surrender-btn">🏳️ 投降</button>
 
-<!-- 表头区域 -->
+    <div class="container">
+        <h1>Vocaloid 猜曲游戏</h1>
+
+        <!-- 表头区域 (8列布局) -->
         <div class="grid-header">
             <div class="col-title">曲名</div>
-            <div class="col-singer">歌姬</div> 
+            <div class="col-singer">歌姬</div>
             <div class="col-author">P主</div>
             <div class="col-status">播放量</div>
             <div class="col-date">投稿日期</div>
+            <div class="col-feature">标签</div>
             <div class="col-sh">SH</div>
             <div class="col-mf">门番</div>
         </div>
 
-        <!-- 猜歌记录面板 -->
+        <!-- 结果展示区 -->
         <div id="results-board"></div>
+    </div>
 
-        <!-- 搜索与提交区域 (移动到底部，更符合截图的 UI 逻辑) -->
-        <div class="search-box">
-            <input type="text" id="guess-input" list="song-list" placeholder="输入你想猜的V家歌曲名..." autocomplete="off">
-            <datalist id="song-list"></datalist>
-            <button id="guess-btn">提交猜测</button>
+    <!-- 底部固定的输入区域 -->
+    <div class="input-section-wrapper">
+        <div class="autocomplete-container">
+            <input type="text" id="guess-input" placeholder="输入至少1个字来搜索..." autocomplete="off">
+            <div id="autocomplete-list" class="autocomplete-items"></div>
+        </div>
+        <button id="guess-btn">猜！</button>
+    </div>
+
+    <!-- 游戏结束结算弹窗 -->
+    <div id="end-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="modal-title">正确答案</h2>
+            <p id="modal-subtitle">很遗憾，本局未能猜中</p>
+            <h1 id="modal-song-name">歌曲名</h1>
+
+            <div class="modal-details">
+                <div class="detail-row">
+                    <span>🎤 歌姬</span>
+                    <strong id="m-singer">未知</strong>
+                </div>
+                <div class="detail-row">
+                    <span>👤 P主</span>
+                    <strong id="m-author">未知</strong>
+                </div>
+                <div class="detail-row">
+                    <span>▶️ 播放量</span>
+                    <strong id="m-play">0万</strong>
+                </div>
+                <div class="detail-row">
+                    <span>📅 投稿日期</span>
+                    <strong id="m-date">未知</strong>
+                </div>
+                <div class="detail-row">
+                    <span>🏷️ 标签</span>
+                    <strong id="m-feature">无</strong>
+                </div>
+                <div class="detail-row">
+                    <span>🎵 SH</span>
+                    <strong id="m-sh">无</strong>
+                </div>
+                <div class="detail-row">
+                    <span>⛩️ 门番</span>
+                    <strong id="m-mf">无</strong>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button id="btn-restart" class="btn-primary">🔄 再来一把</button>
+                <button id="btn-close-modal" class="btn-secondary">查看对局</button>
+            </div>
         </div>
     </div>
-    
+
+    <!-- 引入 pinyin-match 库，用于支持拼音/首字母模糊搜索 -->
+    <script src="https://cdn.jsdelivr.net/npm/pinyin-match/dist/main.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
