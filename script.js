@@ -1,24 +1,30 @@
 let songData = [];
 let dailyTarget = null;
 let guessCount = 0; 
+let isGameOver = false;
 
 const guessInput = document.getElementById('guess-input');
 const guessBtn = document.getElementById('guess-btn');
 const resultsBoard = document.getElementById('results-board');
+const autocompleteList = document.getElementById('autocomplete-list');
+const surrenderBtn = document.getElementById('surrender-btn'); 
+
+// 弹窗相关 DOM
+const endModal = document.getElementById('end-modal');
+const btnRestart = document.getElementById('btn-restart');
+const btnCloseModal = document.getElementById('btn-close-modal');
+
+// 🛡️ 安全获取显示名称，防止 JSON 漏填数据导致崩溃
+function getSafeName(songObj) {
+    if (!songObj) return "";
+    return (songObj.song || songObj.title || "").toString().trim();
+}
 
 // 1. 初始化数据
 fetch('vocaloid_data.json')
     .then(response => response.json())
     .then(data => {
         songData = data;
-        const dataList = document.getElementById('song-list');
-        songData.forEach(song => {
-            if (song.title && song.title.trim() !== "无") {
-                const option = document.createElement('option');
-                option.value = song.title.trim(); 
-                dataList.appendChild(option);
-            }
-        });
         setRandomTarget();
     })
     .catch(error => console.error("读取数据失败：", error));
@@ -26,104 +32,227 @@ fetch('vocaloid_data.json')
 function setRandomTarget() {
     const index = Math.floor(Math.random() * songData.length);
     dailyTarget = songData[index];
-    console.log("🤫 答案是：", dailyTarget.title.trim());
+    console.log("🤫 答案是：", getSafeName(dailyTarget)); 
 }
 
-// 2. 交互逻辑
-guessBtn.addEventListener('click', () => {
-    const userGuessTitle = guessInput.value.trim();
-    if (userGuessTitle === "") { alert("请输入歌曲名！"); return; }
+// 2. 智能模糊搜索逻辑
+guessInput.addEventListener('input', function() {
+    if (isGameOver) return; // 游戏结束后禁止搜索
+    const val = this.value.trim();
+    autocompleteList.innerHTML = ''; 
+    
+    if (!val) {
+        autocompleteList.style.display = 'none';
+        return;
+    }
 
-    const guessSong = songData.find(s => s.title.trim() === userGuessTitle);
-    if (!guessSong) { alert("曲库里没找到，请从下拉列表选择！"); return; }
+    const matchedSongs = songData.filter(s => {
+        const shortName = getSafeName(s);
+        const fullName = (s.title || "").toString().trim();
+        
+        if (shortName === "无" || shortName === "") return false;
 
-    guessCount++;
-    renderResultRow(guessSong, dailyTarget);
-    guessInput.value = ""; 
+        const searchStr = val.toLowerCase();
+        if (shortName.toLowerCase().includes(searchStr) || fullName.toLowerCase().includes(searchStr)) {
+            return true;
+        }
 
-    if (guessSong.title.trim() === dailyTarget.title.trim()) {
-        setTimeout(() => alert(`🎉 恭喜通关！共猜了 ${guessCount} 次！\n刷新网页即可开启新的一局！`), 500);
+        if (typeof PinyinMatch !== 'undefined') {
+            if (PinyinMatch.match(shortName, val)) {
+                return true;
+            }
+        }
+        return false;
+    });
+
+    if (matchedSongs.length === 0) {
+        autocompleteList.style.display = 'none';
+        return;
+    }
+
+    autocompleteList.style.display = 'block';
+    
+    const uniqueNames = new Set();
+    let count = 0;
+    
+    for (let i = 0; i < matchedSongs.length; i++) {
+        if (count >= 8) break; 
+        
+        const sName = getSafeName(matchedSongs[i]);
+        
+        if (!uniqueNames.has(sName)) {
+            uniqueNames.add(sName);
+            count++;
+            
+            const item = document.createElement('div');
+            item.textContent = sName;
+            
+            item.addEventListener('click', function() {
+                guessInput.value = sName;
+                autocompleteList.innerHTML = '';
+                autocompleteList.style.display = 'none';
+            });
+            autocompleteList.appendChild(item);
+        }
     }
 });
 
-// 3. 核心：渲染七宫格与状态比对
+// 点击空白处收起提示框
+document.addEventListener('click', function (e) {
+    if (e.target !== guessInput) {
+        autocompleteList.style.display = 'none';
+    }
+});
+
+// 3. 游戏比对交互逻辑
+guessBtn.addEventListener('click', () => {
+    if (isGameOver) {
+        showEndGameModal(guessCount > 0 && getSafeName(resultsBoard.firstChild) === getSafeName(dailyTarget)); // 只是再次展示弹窗
+        return; 
+    }
+
+    const userGuessTitle = guessInput.value.trim();
+    if (userGuessTitle === "") { alert("请输入歌曲名！"); return; }
+
+    const guessSong = songData.find(s => getSafeName(s) === userGuessTitle);
+    
+    if (!guessSong) { alert("曲库里没找到，请从给出的提示列表中选择！"); return; }
+
+    guessCount++;
+    renderResultRow(guessSong, dailyTarget);
+    
+    guessInput.value = ""; 
+    autocompleteList.innerHTML = '';
+    autocompleteList.style.display = 'none';
+
+    const gName = getSafeName(guessSong);
+    const tName = getSafeName(dailyTarget);
+
+    if (gName === tName) {
+        isGameOver = true;
+        surrenderBtn.style.display = 'none'; // 猜中了隐藏投降按钮
+        setTimeout(() => showEndGameModal(true), 600); // 延迟展示弹窗，让玩家先看到全绿
+    }
+});
+
+// 4. 渲染八宫格与状态比对
 function renderResultRow(guess, target) {
     const row = document.createElement('div');
     row.className = 'result-row';
 
-    // (1) 曲名 (白底黑字)
-    row.appendChild(createBox(guess.title.trim(), 'name-box'));
+    row.appendChild(createBox(getSafeName(guess), 'name-box'));
 
-    // (2) 歌姬 (统一颜色：完全一致绿，部分一致橙，毫无交集灰)
-    const gSinger = guess.歌姬 || "未知";
-    const tSinger = target.歌姬 || "未知";
-    const singerStatus = getSingerStatus(gSinger, tSinger);
-    row.appendChild(createBox(gSinger, singerStatus));
+    const gSinger = (guess.歌姬 || "未知").toString();
+    const tSinger = (target.歌姬 || "未知").toString();
+    row.appendChild(createBox(gSinger, getSingerStatus(gSinger, tSinger)));
 
-    // (3) P主
     const authorStatus = (guess.author === target.author) ? 'correct-box' : 'incorrect-box';
-    row.appendChild(createBox(guess.author, authorStatus));
+    row.appendChild(createBox(guess.author || "未知", authorStatus));
 
-    // (4) 播放量 (核心修改：引入 50w 阈值)
-    const gPlayWan = Math.ceil(Number(guess.play_count) / 10000);
-    const tPlayWan = Math.ceil(Number(target.play_count) / 10000);
-    let playColor = 'incorrect-box'; // 默认底色改为灰色
+    const gPlayWan = Math.ceil(Number(guess.play_count || 0) / 10000);
+    const tPlayWan = Math.ceil(Number(target.play_count || 0) / 10000);
+    let playColor = 'incorrect-box'; 
     let playText = gPlayWan + "万";
     
     if (gPlayWan === tPlayWan) {
-        playColor = 'correct-box'; // 完全猜中：绿色
+        playColor = 'correct-box'; 
     } else {
-        // 判断箭头方向
-        if (tPlayWan > gPlayWan) {
-            playText += " ⬆️";
-        } else {
-            playText += " ⬇️";
-        }
-        
-        // 计算绝对值差，如果差距小于等于 50 万，则变成橙色
-        const diff = Math.abs(tPlayWan - gPlayWan);
-        if (diff <= 50) {
-            playColor = 'close-box'; // 接近：橙色
-        } else {
-            playColor = 'incorrect-box'; // 偏离太多：灰色
-        }
+        playText += (tPlayWan > gPlayWan) ? " ⬆️" : " ⬇️";
+        if (Math.abs(tPlayWan - gPlayWan) <= 50) playColor = 'close-box'; 
     }
     row.appendChild(createBox(playText, playColor));
 
-    // (5) 投稿日期
+    // (5) 投稿日期 (已修复年份匹配逻辑)
     const gDate = parseCustomDate(guess.publish_date);
     const tDate = parseCustomDate(target.publish_date);
     let dateColor = 'incorrect-box';
-    let dateText = guess.publish_date;
+    let dateText = guess.publish_date || "未知";
     
     if (gDate.getTime() === tDate.getTime()) {
         dateColor = 'correct-box';
-    } else if (tDate > gDate) {
-        dateColor = 'close-box'; 
-        dateText += " ⬆️";
     } else {
-        dateColor = 'close-box';
-        dateText += " ⬇️";
+        // 先判断箭头
+        if (tDate > gDate) {
+            dateText += " ⬆️";
+        } else {
+            dateText += " ⬇️";
+        }
+        
+        // 再判断颜色：只有当“年份”相同时，才给黄色（close-box），否则是灰色（incorrect-box）
+        if (gDate.getFullYear() === tDate.getFullYear()) {
+            dateColor = 'close-box'; 
+        } else {
+            dateColor = 'incorrect-box';
+        }
     }
     row.appendChild(createBox(dateText, dateColor));
 
-    // (6) SH 属性
+    const gFeature = getFeatureArray(guess.feature);
+    const tFeature = getFeatureArray(target.feature);
+    row.appendChild(createBox(gFeature.join("/"), getFeatureStatus(gFeature, tFeature)));
+
     const gSH = getSHTag(guess);
     const tSH = getSHTag(target);
-    const shColor = (gSH === tSH) ? 'correct-box' : 'incorrect-box';
-    row.appendChild(createBox(gSH, shColor));
+    row.appendChild(createBox(gSH, (gSH === tSH) ? 'correct-box' : 'incorrect-box'));
 
-    // (7) 门番属性
     const gMf = (guess.门番标签 && guess.门番标签 !== "无") ? "门番" : "无";
     const tMf = (target.门番标签 && target.门番标签 !== "无") ? "门番" : "无";
-    const mfColor = (gMf === tMf) ? 'correct-box' : 'incorrect-box';
-    row.appendChild(createBox(gMf, mfColor));
+    row.appendChild(createBox(gMf, (gMf === tMf) ? 'correct-box' : 'incorrect-box'));
 
     resultsBoard.prepend(row);
 }
 
-// --- 辅助逻辑函数 ---
+// 5. 投降/结算弹窗控制
+surrenderBtn.addEventListener('click', () => {
+    if (!dailyTarget || isGameOver) return;
+    isGameOver = true;
+    surrenderBtn.style.display = 'none'; // 隐藏投降按钮
+    showEndGameModal(false);
+});
 
+// 展示结算弹窗
+function showEndGameModal(isWin) {
+    if (!dailyTarget) return;
+
+    // 修改标题文案
+    document.getElementById('modal-title').textContent = isWin ? "🎉 恭喜通关！" : "🎯 正确答案";
+    document.getElementById('modal-subtitle').textContent = isWin ? `太强了，你一共猜了 ${guessCount} 次！` : "很遗憾，本局未能猜中，下次再接再厉~";
+    
+    // 填充歌曲数据
+    document.getElementById('modal-song-name').textContent = getSafeName(dailyTarget);
+    document.getElementById('m-singer').textContent = dailyTarget.歌姬 || "未知";
+    document.getElementById('m-author').textContent = dailyTarget.author || "未知";
+    
+    const playCount = Math.ceil(Number(dailyTarget.play_count || 0) / 10000);
+    document.getElementById('m-play').textContent = playCount + "万";
+    document.getElementById('m-date').textContent = dailyTarget.publish_date || "未知";
+    
+    const features = getFeatureArray(dailyTarget.feature);
+    document.getElementById('m-feature').textContent = features.join("/");
+    document.getElementById('m-sh').textContent = getSHTag(dailyTarget);
+    
+    const mf = (dailyTarget.门番标签 && dailyTarget.门番标签 !== "无") ? "门番" : "无";
+    document.getElementById('m-mf').textContent = mf;
+
+    // 显示弹窗
+    endModal.style.display = 'flex';
+}
+
+// 弹窗按钮事件
+btnRestart.addEventListener('click', () => {
+    location.reload(); // 刷新页面开启新一局
+});
+
+btnCloseModal.addEventListener('click', () => {
+    endModal.style.display = 'none'; // 隐藏弹窗，方便玩家回看猜歌记录
+    // 隐藏弹窗后，把底部输入框变成提示文本
+    guessInput.value = "";
+    guessInput.placeholder = "游戏已结束，点击上方【投降】旁空白处可刷新";
+    guessInput.disabled = true;
+});
+
+
+// --- 辅助逻辑函数 ---
 function createBox(text, className) {
     const box = document.createElement('div');
     box.textContent = text;
@@ -131,10 +260,28 @@ function createBox(text, className) {
     return box;
 }
 
-// 核心：智能匹配歌姬名称
+function getFeatureArray(feat) {
+    if (!feat || feat === "无" || (Array.isArray(feat) && feat.length === 0)) return ["无"];
+    return Array.isArray(feat) ? feat : [feat];
+}
+
+function getFeatureStatus(gFeatArray, tFeatArray) {
+    const gStr = [...gFeatArray].sort().join();
+    const tStr = [...tFeatArray].sort().join();
+    if (gStr === tStr) return 'correct-box'; 
+    
+    let hasOverlap = false;
+    for (let f of gFeatArray) {
+        if (tFeatArray.includes(f) && f !== "无") {
+            hasOverlap = true; break;
+        }
+    }
+    if (hasOverlap) return 'close-box'; 
+    return 'incorrect-box'; 
+}
+
 function getSingerStatus(guessSinger, targetSinger) {
     if (guessSinger === "未知" || targetSinger === "未知" || guessSinger === "无" || targetSinger === "无") return 'incorrect-box';
-
     if (guessSinger === targetSinger) return 'correct-box'; 
 
     const splitRegex = /[,，、\s&+\/]/; 
@@ -142,19 +289,10 @@ function getSingerStatus(guessSinger, targetSinger) {
     const tSet = new Set(targetSinger.split(splitRegex).filter(s => s.trim() !== ''));
 
     let overlap = 0;
-    for (let s of gSet) {
-        if (tSet.has(s)) overlap++;
-    }
+    for (let s of gSet) { if (tSet.has(s)) overlap++; }
 
-    if (overlap === tSet.size && overlap === gSet.size) {
-        return 'correct-box'; 
-    }
-    
-    if (overlap > 0) {
-        // 修改点：为了统一视觉，将 partial-box (黄色) 统一替换为 close-box (橙色)
-        return 'close-box'; 
-    }
-
+    if (overlap === tSet.size && overlap === gSet.size) return 'correct-box'; 
+    if (overlap > 0) return 'close-box'; 
     return 'incorrect-box'; 
 }
 
@@ -168,9 +306,7 @@ function parseCustomDate(dateStr) {
     if (!dateStr || dateStr === "无") return new Date(0); 
     if (dateStr.includes('/')) {
         const parts = dateStr.split('/');
-        if (parts.length === 3) {
-            return new Date(parts[2], parts[1] - 1, parts[0]);
-        }
+        if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
     }
     return new Date(dateStr);
 }
