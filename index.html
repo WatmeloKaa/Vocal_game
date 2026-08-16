@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vocaloid 猜曲游戏</title>
+    <title>洛一把，洛一把</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 后门：投降按钮放在最右上角 -->
-    <button id="surrender-btn" class="surrender-btn">🏳️ 投降</button>
+    <!-- 顶部操作区 -->
+    <div class="top-actions">
+        <a href="tutorial.html" class="action-btn">📖 新手教程</a>
+        <button id="surrender-btn" class="action-btn">🏳️ 投降</button>
+    </div>
 
     <div class="container">
-        <h1>Vocaloid 猜曲游戏</h1>
+        <h1>洛一把，洛一把</h1>
 
         <!-- 表头区域 (8列布局) -->
         <div class="grid-header">
@@ -83,7 +86,7 @@
         </div>
     </div>
 
-    <!-- 引入 pinyin-match 库，用于支持拼音/首字母模糊搜索 -->
+    <!-- 引入 pinyin-match 库 -->
     <script src="https://cdn.jsdelivr.net/npm/pinyin-match/dist/main.js"></script>
     <script src="script.js"></script>
 </body>
