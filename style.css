@@ -6,8 +6,9 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #121213;
-    color: #ffffff;
+    /* 清新淡蓝灰背景 */
+    background-color: #f0f4f8;
+    color: #334155;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -15,7 +16,37 @@ body {
     min-height: 100vh;
 }
 
-/* 扩展容器宽度以容纳8列，底部预留 80px 防止内容被搜索栏挡住 */
+/* 顶部操作区 */
+.top-actions {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 15px;
+    z-index: 100;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    background-color: #ffffff;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.action-btn:hover {
+    background-color: #e2e8f0;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+/* 扩展容器宽度以容纳8列 */
 .container {
     width: 100%;
     max-width: 1250px; 
@@ -26,6 +57,8 @@ h1 {
     text-align: center;
     margin-bottom: 30px;
     letter-spacing: 2px;
+    color: #1e293b;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 /* 8列网格比例分配 */
@@ -34,16 +67,16 @@ h1 {
     grid-template-columns: 2.2fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr 0.7fr 0.7fr;
     gap: 8px;
     align-items: stretch; 
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .grid-header {
     font-weight: bold;
     text-align: center;
     padding-bottom: 10px;
-    border-bottom: 1px solid #3a3a3c;
+    border-bottom: 2px solid #cbd5e1;
     margin-bottom: 15px;
-    color: #d7dadc;
+    color: #64748b;
 }
 
 .attr-box {
@@ -52,10 +85,11 @@ h1 {
     justify-content: center;
     padding: 12px 8px;
     font-weight: bold;
-    border-radius: 4px;
+    border-radius: 8px;
     text-align: center;
     word-break: break-word; 
     font-size: 14px;
+    box-shadow: 0 2px 6px rgba(148, 163, 184, 0.1); /* 增加微弱浮雕感 */
 }
 
 /* 固定在页面底部的搜索栏外壳 */
@@ -64,9 +98,10 @@ h1 {
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color: #121213; 
+    background-color: rgba(255, 255, 255, 0.95); 
+    backdrop-filter: blur(8px); /* 底部毛玻璃效果 */
     padding: 15px 20px;
-    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.6); 
+    box-shadow: 0 -4px 20px rgba(148, 163, 184, 0.15); 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -80,70 +115,103 @@ h1 {
 }
 
 #guess-input {
-    padding: 12px;
+    padding: 12px 16px;
     font-size: 16px;
     width: 350px;
-    border-radius: 4px;
-    border: 1px solid #3a3a3c;
-    background-color: #3a3a3c;
-    color: white;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background-color: #f8fafc;
+    color: #334155;
     outline: none;
+    transition: all 0.2s ease;
+}
+
+#guess-input::placeholder {
+    color: #94a3b8;
 }
 
 #guess-input:focus {
-    border-color: #818384;
+    border-color: #60a5fa; /* 天蓝色聚焦边框 */
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    background-color: #ffffff;
 }
 
 #guess-btn {
-    padding: 12px 24px;
+    padding: 12px 28px;
     font-size: 16px;
     border: none;
-    border-radius: 4px;
-    background-color: #538d4e;
+    border-radius: 8px;
+    background-color: #60a5fa; /* 清新天蓝色主按钮 */
     color: white;
     cursor: pointer;
     font-weight: bold;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 4px 10px rgba(96, 165, 250, 0.3);
 }
 
 #guess-btn:hover {
-    background-color: #43713e;
+    background-color: #3b82f6;
+    transform: translateY(-1px);
+}
+
+#guess-btn:active {
+    transform: translateY(1px);
 }
 
 /* 智能提示框：绝对定位，向上弹出 */
 .autocomplete-items {
     position: absolute;
-    bottom: 100%; 
+    bottom: calc(100% + 8px); 
     left: 0;
     width: 350px; 
     max-height: 250px;
     overflow-y: auto;
-    background-color: #2a2a2b;
-    border: 1px solid #3a3a3c;
-    border-bottom: none;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
     z-index: 99;
-    border-radius: 4px 4px 0 0;
+    border-radius: 8px;
     display: none; 
+    box-shadow: 0 -10px 25px rgba(148, 163, 184, 0.2);
 }
 
 .autocomplete-items div {
-    padding: 12px;
+    padding: 12px 16px;
     cursor: pointer;
-    border-bottom: 1px solid #3a3a3c;
-    color: #d7dadc;
+    border-bottom: 1px solid #f1f5f9;
+    color: #475569;
     font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.autocomplete-items div:last-child {
+    border-bottom: none;
 }
 
 .autocomplete-items div:hover {
-    background-color: #538d4e; 
-    color: white;
+    background-color: #eff6ff; 
+    color: #2563eb;
 }
 
-/* 状态颜色 */
-.name-box { background-color: #ffffff; color: #000000; }
-.correct-box { background-color: #538d4e; color: white; }
-.close-box { background-color: #b59f3b; color: white; }
-.incorrect-box { background-color: #3a3a3c; color: white; }
+/* --- 状态颜色 (核心配色修改) --- */
+.name-box { 
+    background-color: #ffffff; 
+    color: #1e293b; 
+    border: 1px solid #e2e8f0;
+}
+.correct-box { 
+    background-color: #34d399; /* 薄荷绿 */
+    color: #ffffff; 
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.close-box { 
+    background-color: #fbbf24; /* 暖阳黄 */
+    color: #ffffff; 
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.incorrect-box { 
+    background-color: #e2e8f0; /* 浅燕麦灰 */
+    color: #64748b; 
+}
 
 /* 投降按钮（后门） */
 .surrender-btn {
@@ -151,19 +219,21 @@ h1 {
     top: 20px;
     right: 20px;
     padding: 6px 12px;
-    background-color: transparent;
-    color: #818384;
-    border: 1px solid #3a3a3c;
-    border-radius: 4px;
+    background-color: #ffffff;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     z-index: 100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
 .surrender-btn:hover {
-    background-color: #3a3a3c;
-    color: #ffffff;
+    background-color: #f1f5f9;
+    color: #0f172a;
+    border-color: #94a3b8;
 }
 
 /* --- 结算弹窗样式 --- */
@@ -173,9 +243,10 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(5px); /* 毛玻璃效果 */
-    display: none; /* 默认隐藏 */
+    /* 浅色毛玻璃遮罩 */
+    background: rgba(241, 245, 249, 0.7);
+    backdrop-filter: blur(5px); 
+    display: none; 
     justify-content: center;
     align-items: center;
     z-index: 2000;
@@ -188,51 +259,52 @@ h1 {
 }
 
 .modal-content {
-    background-color: #2a2a2b; /* 保持与网站主题一致的暗色 */
-    padding: 30px;
-    border-radius: 12px;
+    background-color: #ffffff; 
+    padding: 35px 30px;
+    border-radius: 16px;
     width: 90%;
     max-width: 420px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    border: 1px solid #3a3a3c;
+    box-shadow: 0 20px 50px rgba(148, 163, 184, 0.25);
+    border: 1px solid #e2e8f0;
 }
 
 #modal-title {
-    font-size: 22px;
+    font-size: 24px;
     margin-bottom: 8px;
-    color: #d7dadc;
+    color: #1e293b;
     letter-spacing: 1px;
 }
 
 #modal-subtitle {
     font-size: 14px;
     margin-bottom: 25px;
-    color: #818384;
+    color: #64748b;
 }
 
 #modal-song-name {
-    font-size: 28px;
+    font-size: 26px;
     margin-bottom: 30px;
-    color: #ffffff;
+    color: #0f172a;
     word-break: break-word;
 }
 
 .modal-details {
     text-align: left;
     margin-bottom: 30px;
-    background-color: #1a1a1b;
-    border-radius: 8px;
-    padding: 0 15px;
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 10px;
+    padding: 0 18px;
 }
 
 .detail-row {
     display: flex;
     justify-content: space-between;
     padding: 14px 0;
-    border-bottom: 1px solid #3a3a3c;
+    border-bottom: 1px solid #e2e8f0;
     font-size: 15px;
-    color: #d7dadc;
+    color: #475569;
 }
 
 .detail-row:last-child {
@@ -240,11 +312,11 @@ h1 {
 }
 
 .detail-row span {
-    color: #818384;
+    color: #94a3b8;
 }
 
 .detail-row strong {
-    color: #ffffff;
+    color: #334155;
     text-align: right;
     max-width: 60%;
     word-break: break-word;
@@ -261,28 +333,29 @@ h1 {
     padding: 12px 0;
     font-size: 15px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
     transition: all 0.2s;
 }
 
 .btn-primary {
-    background-color: #538d4e;
+    background-color: #60a5fa;
     color: white;
+    box-shadow: 0 4px 10px rgba(96, 165, 250, 0.25);
 }
 
 .btn-primary:hover {
-    background-color: #43713e;
+    background-color: #3b82f6;
 }
 
 .btn-secondary {
-    background-color: transparent;
-    color: #d7dadc;
-    border: 1px solid #565758;
+    background-color: #ffffff;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
 }
 
 .btn-secondary:hover {
-    background-color: #3a3a3c;
-    color: white;
+    background-color: #f1f5f9;
+    color: #334155;
 }
