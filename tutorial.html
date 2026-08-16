@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新手教程 - Vocaloid 猜曲游戏</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .tutorial-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 2000; display: none;
+        }
+        .tutorial-dialog {
+            position: fixed;
+            top: 50%; left: 50%; transform: translateX(-50%);
+            z-index: 2002;
+            background: #2a2a2b;
+            border: 2px solid #538d4e;
+            padding: 25px;
+            border-radius: 12px;
+            color: white;
+            width: 90%; max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            display: none;
+            line-height: 1.7;
+        }
+        .tutorial-highlight {
+            position: relative;
+            z-index: 2001 !important;
+            outline: 4px dashed #ffcc00;
+            outline-offset: 4px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { outline-color: #ffcc00; }
+            50% { outline-color: #ff5555; }
+            100% { outline-color: #ffcc00; }
+        }
+        .btn-next {
+            margin-top: 25px;
+            padding: 12px 24px;
+            background-color: #538d4e;
+            color: white; border: none; border-radius: 6px;
+            cursor: pointer; font-weight: bold; width: 100%;
+            font-size: 16px; transition: background-color 0.2s;
+        }
+        .btn-next:hover { background-color: #43713e; }
+    </style>
+</head>
+<body>
+    <!-- 顶部操作区 -->
+    <div class="top-actions">
+        <a href="index.html" class="action-btn">⬅️ 返回游戏</a>
+    </div>
+
+    <!-- 教程特有覆盖层 -->
+    <div class="tutorial-overlay" id="tuto-overlay"></div>
+    <div class="tutorial-dialog" id="tuto-dialog">
+        <div id="tuto-text" style="font-size: 16px;"></div>
+        <button class="btn-next" id="tuto-next-btn">下一步</button>
+    </div>
+
+    <div class="container">
+        <h1 style="color: #ffcc00;">新手教程（实验关卡）</h1>
+
+        <div class="grid-header">
+            <div class="col-title">曲名</div>
+            <div class="col-singer">歌姬</div>
+            <div class="col-author">P主</div>
+            <div class="col-status">播放量</div>
+            <div class="col-date">投稿日期</div>
+            <div class="col-feature">标签</div>
+            <div class="col-sh">SH</div>
+            <div class="col-mf">门番</div>
+        </div>
+
+        <div id="results-board"></div>
+    </div>
+
+    <div class="input-section-wrapper" id="tuto-input-wrapper">
+        <div class="autocomplete-container">
+            <input type="text" id="guess-input" placeholder="请根据教程提示输入..." autocomplete="off">
+            <div id="autocomplete-list" class="autocomplete-items"></div>
+        </div>
+        <button id="guess-btn">猜！</button>
+    </div>
+
+    <script src="tutorial.js"></script>
+</body>
+</html>
